@@ -39,13 +39,15 @@ initAcct(account.st, portfolios = portfolio.st, initDate = initdate, currency = 
 initOrders(portfolio.st, initDate = initdate)
 # Store the strategy
 strategy(strategy.st, store = TRUE)
-#Create Indicator for VWAP trading*********--------- 
-
-#opening_price need to add here*****---------
-
-
+#Create Indicator for VWAP trading*********---------
 #need to calculate VWAP---------
-VWAP <- sum(SPY$SPY.Adjusted * SPY$SPY.Volume) / sum(SPY$SPY.Volume)
+#use look back data = 20
+vwap <- sum(SPY$SPY.Adjusted * SPY$SPY.Volume) / sum(SPY$SPY.Volume)
+add.indicator(strategy.st, name = "VWAP", arguments = list(x = quote(Cl(mktdata)), n = 21), label = "vwap")
+#opening_price ???*****---------
+
+
+
 #Create Signal > use SigThreshold for VWAP---------
 #entry_short opening price above Vwap
 
@@ -74,7 +76,7 @@ add.signal(strategy.st, name = "sigThreshold",
                             # The threshold is v
                             threshold = VWAP, 
                             
-                            # We want the oscillator to be over this value
+                            # We want the oscillator to be below this value
                             relationship = "lt", 
                             
                             # We are interested only in the cross
