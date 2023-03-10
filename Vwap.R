@@ -87,7 +87,7 @@ add.signal(strategy.st, name = "sigThreshold",
            label = "entry_long")
 #RULE--------------
 #make trade when over VWAP
-# Create an entry rule of 1 share when all conditions line up to enter into a position
+# Create an entry rule of shares = tradesize when all conditions line up to enter into a position
 #entry_short
 add.rule(strategy.st, name = "ruleSignal", 
          
