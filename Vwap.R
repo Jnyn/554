@@ -6,6 +6,8 @@ library(PerformanceAnalytics)
 library(forecast)
 library(quantstrat)
 library(TTR)
+library(blotter)
+
 # Create initdate, from, and to strings
 initdate <- "1999-01-01"
 from <- "2003-01-01"
@@ -41,15 +43,14 @@ initOrders(portfolio.st, initDate = initdate)
 strategy(strategy.st, store = TRUE)
 #Create Indicator for VWAP trading*********---------
 #need to calculate VWAP---------
-#use look back data = 20
-vwap <- sum(SPY$SPY.Adjusted * SPY$SPY.Volume) / sum(SPY$SPY.Volume)
-add.indicator(strategy.st, name = "VWAP", arguments = list(x = quote(Cl(mktdata)), n = 21), label = "vwap")
-#opening_price ???*****---------
-
-
+#use look back data = 21 days
+vwap <- VWAP(SPY$SPY.Adjusted,SPY$SPY.Volume, n = 21)
+#vwap <- sum(SPY$SPY.Adjusted * SPY$SPY.Volume) / sum(SPY$SPY.Volume)
+add.indicator(strategy.st, name = "VWAP", arguments = list(HLC = quote(HLC(mktdata)), n = 21), label = "vwap")
+#opening_price calculate & GARCH*****---------
 
 #Create Signal > use SigThreshold for VWAP---------
-#entry_short opening price above Vwap
+#entry_short opening price above VWAP
 
 add.signal(strategy.st, name = "sigThreshold", 
            
@@ -59,13 +60,13 @@ add.signal(strategy.st, name = "sigThreshold",
                             # The threshold is v
                             threshold = VWAP, 
                             
-                            # We want the oscillator to be over this value
+                            # We want the opening_price to be over this value
                             relationship = "gt", 
                             
                             # We are interested only in the cross
                             cross = TRUE), 
            
-           # Label it shortthreshold
+           # Label it entry_short
            label = "entry_short")
 #entry_long opening price below Vwap
 add.signal(strategy.st, name = "sigThreshold", 
@@ -76,13 +77,13 @@ add.signal(strategy.st, name = "sigThreshold",
                             # The threshold is v
                             threshold = VWAP, 
                             
-                            # We want the oscillator to be below this value
+                            # We want the opening_price to be below this value
                             relationship = "lt", 
                             
                             # We are interested only in the cross
                             cross = TRUE), 
            
-           # Label it longthreshold
+           # Label it entry_long
            label = "entry_long")
 #RULE--------------
 #make trade when over VWAP
@@ -96,13 +97,13 @@ add.rule(strategy.st, name = "ruleSignal",
                         # Set sigval to TRUE
                         sigval = TRUE, 
                         
-                        # Set orderqty to 1
-                        orderqty = 1,
+                        # Set orderqty to tradesize
+                        orderqty = tradesize,
                         
                         # Use a market type of order
                         ordertype = "market",
                         
-                        # Take the long orderside
+                        # Take the short orderside
                         orderside = "short",
                         
                         # Do not replace other signals
@@ -122,8 +123,8 @@ add.rule(strategy.st, name = "ruleSignal",
                         # Set sigval to TRUE
                         sigval = TRUE, 
                         
-                        # Set orderqty to 1
-                        orderqty = 1,
+                        # Set orderqty to tradesize
+                        orderqty = tradesize,
                         
                         # Use a market type of order
                         ordertype = "market",
